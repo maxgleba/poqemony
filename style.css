@@ -55,3 +55,15 @@ body {
     visibility: hidden;
     transition: all 0.8s ease-in-out;
 }
+.logs {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #00bfff;
+}
+.logs div {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
