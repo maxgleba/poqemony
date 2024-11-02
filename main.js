@@ -1,4 +1,4 @@
-const createCharacter = (name, healthElement, attackButton, specialButton) => ({
+const createCharacter = ({ name, healthElement, attackButton, specialButton }) => ({
     name,
     health: 100,
     healthElement,
@@ -23,15 +23,15 @@ const createCharacter = (name, healthElement, attackButton, specialButton) => ({
         const pokeball = document.getElementById('pokeball');
         pokeball.style.visibility = 'visible';
 
-        const attackerPos = this.attackButton.parentElement.getBoundingClientRect();
-        const targetPos = this.enemy.attackButton.parentElement.getBoundingClientRect();
+        const { top: attackerTop, left: attackerLeft } = this.attackButton.parentElement.getBoundingClientRect();
+        const { top: targetTop, left: targetLeft } = this.enemy.attackButton.parentElement.getBoundingClientRect();
 
-        pokeball.style.top = attackerPos.top + 'px';
-        pokeball.style.left = attackerPos.left + 'px';
+        pokeball.style.top = `${attackerTop}px`;
+        pokeball.style.left = `${attackerLeft}px`;
 
         setTimeout(() => {
-            pokeball.style.top = targetPos.top + 'px';
-            pokeball.style.left = targetPos.left + 'px';
+            pokeball.style.top = `${targetTop}px`;
+            pokeball.style.left = `${targetLeft}px`;
         }, 50);
 
         setTimeout(() => {
@@ -42,36 +42,46 @@ const createCharacter = (name, healthElement, attackButton, specialButton) => ({
         if (isAttacking) return;
         isAttacking = true;
         this.showPokeball();
+        
         const damage = isSpecial ? this.specialAttack() : this.attack();
         this.enemy.health -= damage;
+        if (this.enemy.health < 0) this.enemy.health = 0;
+        
         this.enemy.updateHealthBar();
+        
+        addLog(`${this.name} used ${isSpecial ? 'Special Attack' : 'Attack'} on ${this.enemy.name}. Damage: ${damage}. ${this.enemy.name} has ${this.enemy.health} HP left.`);
+        
         setTimeout(() => isAttacking = false, 800);
     }
 });
 
-// Створюємо об'єкти character і enemy
-const pikachu = createCharacter('Pikachu', document.getElementById('health1'), document.getElementById('attack1'), document.getElementById('special1'));
-const charmander = createCharacter('Charmander', document.getElementById('health2'), document.getElementById('attack2'), document.getElementById('special2'));
 
-// Призначаємо один одного як супротивників
+const addLog = (message) => {
+    const logs = document.getElementById('logs');
+    const logEntry = document.createElement('div');
+    logEntry.textContent = message;
+    logs.prepend(logEntry); 
+};
+const pikachu = createCharacter({
+    name: 'Pikachu',
+    healthElement: document.getElementById('health1'),
+    attackButton: document.getElementById('attack1'),
+    specialButton: document.getElementById('special1')
+});
+
+const charmander = createCharacter({
+    name: 'Charmander',
+    healthElement: document.getElementById('health2'),
+    attackButton: document.getElementById('attack2'),
+    specialButton: document.getElementById('special2')
+});
+
+
 pikachu.enemy = charmander;
 charmander.enemy = pikachu;
 
 let isAttacking = false;
-
-// Події для кнопок атаки та спеціальної атаки
-pikachu.attackButton.addEventListener('click', function() {
-    pikachu.battle();
-});
-
-pikachu.specialButton.addEventListener('click', function() {
-    pikachu.battle(true);
-});
-
-charmander.attackButton.addEventListener('click', function() {
-    charmander.battle();
-});
-
-charmander.specialButton.addEventListener('click', function() {
-    charmander.battle(true);
-});
+pikachu.attackButton.addEventListener('click', () => pikachu.battle());
+pikachu.specialButton.addEventListener('click', () => pikachu.battle(true));
+charmander.attackButton.addEventListener('click', () => charmander.battle());
+charmander.specialButton.addEventListener('click', () => charmander.battle(true));
